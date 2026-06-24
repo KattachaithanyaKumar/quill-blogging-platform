@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #2d7a3a;
+  --color-secondary: #1a1a1a;
+  --color-tertiary: #aa4c68;
+  --color-neutral: #f2efe7;
+}
+
+html,
+body {
+  background-color: var(--color-neutral);
+}
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Playfair Display", serif;
+}
