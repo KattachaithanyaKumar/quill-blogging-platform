@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Modal from "./Modal";
-import Input from "../formComponents/Input";
 import { loginUser, registerUser } from "../api/AuthAPI";
+import { Input } from "antd";
+import toast from "react-hot-toast";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,31 +19,48 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const handleClick = () => (isLogin ? handleLogin() : handleSignup());
 
   const handleLogin = async () => {
+    const toastId = toast.loading("Logging in...");
     try {
       setIsLoading(true);
       const res = await loginUser(email, password);
-
       console.log(res);
+
+      setEmail("");
+      setPassword("");
+
+      localStorage.setItem("token", res.token);
+
+      toast.success("User successfully logged in!", { id: toastId });
     } catch (err) {
       console.error(err);
+      toast.error("Login failed!", { id: toastId });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSignup = async () => {
+    const toastId = toast.loading("Creating an account...");
     try {
       setIsLoading(true);
-
       if (password !== confirmPassword) {
-        console.warn("password dont match");
+        toast.error("Passwords don't match!", { id: toastId });
         return;
       }
-
       const res = await registerUser(email, password);
       console.log(res);
+
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+
+      toast.success("Account created!", { id: toastId });
+
+      setIsLogin(true);
+      toast("Login to continue");
     } catch (err) {
       console.error(err);
+      toast.error("Account creation failed!", { id: toastId });
     } finally {
       setIsLoading(false);
     }
@@ -72,44 +90,43 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
         {/* Inputs */}
         <div className="flex flex-col gap-3">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            rightLabel={
-              isLogin ? (
-                <button className="hover:text-[#1a1a1a] transition-colors">
-                  Forgot password?
-                </button>
-              ) : null
-            }
-          />
-
-          {!isLogin && (
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-gray-600">
+              Email address
+            </span>
             <Input
-              label="Confirm Password"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              size="large"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-gray-600">Password</span>
+            <Input.Password
               type="password"
               placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              rightLabel={
-                isLogin ? (
-                  <button className="hover:text-[#1a1a1a] transition-colors">
-                    Forgot password?
-                  </button>
-                ) : null
-              }
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              size="large"
             />
+          </label>
+
+          {!isLogin && (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-gray-600">
+                Confirm password
+              </span>
+              <Input.Password
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                size="large"
+              />
+            </label>
           )}
         </div>
 
