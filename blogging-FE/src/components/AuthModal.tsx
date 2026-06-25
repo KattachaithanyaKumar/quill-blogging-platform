@@ -3,6 +3,9 @@ import Modal from "./Modal";
 import { loginUser, registerUser } from "../api/AuthAPI";
 import { Input } from "antd";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "../store/slice/authSlice";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,6 +18,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleClick = () => (isLogin ? handleLogin() : handleSignup());
 
@@ -29,8 +35,16 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       setPassword("");
 
       localStorage.setItem("token", res.token);
+      dispatch(
+        setUser({
+          id: res.user.id,
+          email: res.user.email,
+          username: res.user.username,
+        }),
+      );
 
       toast.success("User successfully logged in!", { id: toastId });
+      navigate("/home");
     } catch (err) {
       console.error(err);
       toast.error("Login failed!", { id: toastId });
